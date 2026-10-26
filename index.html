@@ -264,7 +264,7 @@ async function logout(){
  resetView();storageError='';view='overview';render();
  if(cloud){try{await cloud.auth.signOut({scope:'local'});}catch{sessionStorage.removeItem('sct-cloud-auth');}loadCloud(true).catch(()=>{});}
 }
-function syncNote(){if(admin())return 'Thay đổi được gửi ngay tới người xem';if(!liveOK)return 'Tự kiểm tra cập nhật mỗi 2 phút';return adminOnline?'Quản trị viên đang trực tuyến · cập nhật tức thì':'Quản trị viên ngoại tuyến · tạm dừng cập nhật';}
+function syncNote(){if(admin())return 'Thay đổi được gửi ngay tới người xem';if(!liveOK)return 'Tự kiểm tra cập nhật mỗi 2 phút';return adminOnline?'Quản trị viên đang trực tuyến · cập nhật tức thì':'Quản trị viên ngoại tuyến';}
 function startLive(){try{if(!cloud?.channel||live)return;live=cloud.channel('sct-live',{config:{broadcast:{self:false}}});live.on('broadcast',{event:'changed'},()=>{if(cloud&&!admin())loadCloud().catch(()=>{});}).on('presence',{event:'sync'},()=>{const st=live.presenceState();const on=Object.values(st).flat().some(x=>x&&x.role==='admin');const was=adminOnline;adminOnline=on;paintSync();if(on&&!was&&!admin())loadCloud().catch(()=>{});}).subscribe(st=>{liveOK=st==='SUBSCRIBED';if(liveOK)syncPresence();paintSync();});}catch{liveOK=false;}}
 async function syncPresence(){if(!live||!liveOK)return;try{if(admin()&&!tracking){await live.track({role:'admin',at:Date.now()});tracking=true;}else if(!admin()&&tracking){await live.untrack();tracking=false;}}catch{}}
 function announceChange(){try{live?.send({type:'broadcast',event:'changed',payload:{at:Date.now()}});}catch{}}
